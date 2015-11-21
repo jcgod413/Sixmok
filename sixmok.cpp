@@ -52,3 +52,20 @@ void Sixmok::reset()
 	initBoard();
 	memset(move, 0, BOARD_SIZE*BOARD_SIZE);
 }
+
+int Sixmok::input(Player player, int x, int y)
+{
+	if( move[y][x] == playerA
+		|| move[y][x] == playerB )	{
+		// 이미 돌이 존재. 에러메시지 1 return
+		return 1;	
+	}
+	else if( x < 1 || x > BOARD_SIZE-1 
+			|| y < 1 || y > BOARD_SIZE-1 )	{
+		// 허용 범위가 넘어섬. 에러메시지 2 return
+		return 2;
+	}
+	
+	board[y][x] = player;
+	return 0;	// 정상 수행
+}

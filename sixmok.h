@@ -16,6 +16,7 @@ public:
 	void initBoard();
 	void printBoard();
 	void reset();
+	void input(Player player, int x, int y);
 
 private:
 	// 판의 그림을 담고있는 배열
