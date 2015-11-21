@@ -15,6 +15,7 @@ public:
 	Sixmok();
 	void initBoard();
 	void printBoard();
+	void reset();
 
 private:
 	// 판의 그림을 담고있는 배열

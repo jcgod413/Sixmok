@@ -46,3 +46,9 @@ void Sixmok::printBoard()
 	cout << "0123456789111111111" << endl;
 	cout << "          012345678" << endl << endl;
 }
+
+void Sixmok::reset()
+{
+	initBoard();
+	memset(move, 0, BOARD_SIZE*BOARD_SIZE);
+}
