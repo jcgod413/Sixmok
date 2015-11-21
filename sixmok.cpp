@@ -33,8 +33,14 @@ void Sixmok::printBoard()
 {
 	system("clear");
 	for(int i=0; i<BOARD_SIZE; i++)	{
-		for(int j=0; j<BOARD_SIZE; j++)
-			cout << board[i][j];
+		for(int j=0; j<BOARD_SIZE; j++)	{
+			switch( move[i][j])	{
+				case EMPTY:		cout << board[i][j];	break;
+				case playerA:	cout << "○";			break;
+				case playerB:	cout << "●";			break;
+			}		
+		}
+			
 		cout << " " << i << endl;
 	}
 	cout << "0123456789111111111" << endl;
