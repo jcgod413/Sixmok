@@ -9,14 +9,15 @@ enum Player {
 	playerB = 2
 };
 
-enum Dir_Vertical	{
-	top = -1,
-	remain = 0,
-	down = 1
-};
-enum Dir_Horizontal	{
-	left = -1,
-	right = 1
+enum Direction	{
+	Top,
+	Right_Top,
+	Right,
+	Right_Down,
+	Down,
+	Left_Down,
+	Left,
+	Left_Top
 };
 
 class Sixmok
@@ -30,6 +31,8 @@ public:
 	void reset();
 	void input();
 	void nextTurn();
+	void findConnection();
+	int recursiveCount(int x, int y, int cnt, int dir);
 
 private:
 	// 판의 그림을 담고있는 배열
@@ -40,6 +43,11 @@ private:
 	bool isPlay;
 	// 현재 차례의 Player
 	Player nowTurn;
-	// 현재 수를 나타내는 변수
-	int count;
+	// 현재 수의 번호를 나타내는 변수
+	int number;
+	// 8방향의 값을 나타내는 배열
+	int direction[8][2] = { {-1, 0}, {-1, 1}, {0, 1},  {1, 1},
+					  {1, 0},  {1, -1}, {0, -1}, {-1, -1} };
+	// 연속적인 돌의 조합을 담는 배열
+	int consecutiveMove[10];
 };
