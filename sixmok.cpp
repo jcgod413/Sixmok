@@ -2,12 +2,15 @@
 
 Sixmok::Sixmok()
 {
-	initBoard();
-	printBoard();
+	init();
 }
 
-void Sixmok::initBoard()
+void Sixmok::init()
 {
+	isPlay = false;
+	nowTurn = playerA;
+	count = 1;
+
 	// 모서리
     board[0][0] = "┌", 
     board[0][BOARD_SIZE-1] = "┐", 
@@ -29,13 +32,27 @@ void Sixmok::initBoard()
     }
 }
 
+void Sixmok::play()
+{
+	isPlay = true;
+
+	while( isPlay )	{
+		// 판 그리기
+		printBoard();	
+		// 사용자로부터 돌의 입력 받기
+		input();
+		// 다음 차례로 변경
+		nextTurn();
+	}
+}
+
 void Sixmok::printBoard()
 {
 	system("clear");
 	for(int i=0; i<BOARD_SIZE; i++)	{
 		for(int j=0; j<BOARD_SIZE; j++)	{
 			switch( move[i][j])	{
-				case EMPTY:		cout << board[i][j];	break;
+				case empty:		cout << board[i][j];	break;
 				case playerA:	cout << "○";			break;
 				case playerB:	cout << "●";			break;
 			}		
@@ -47,25 +64,48 @@ void Sixmok::printBoard()
 	cout << "          012345678" << endl << endl;
 }
 
+void Sixmok::nextTurn()
+{
+	nowTurn = static_cast<Player>((static_cast<int>(nowTurn) % 2) + 1);
+	count++;
+}
+
 void Sixmok::reset()
 {
-	initBoard();
+	init();
 	memset(move, 0, BOARD_SIZE*BOARD_SIZE);
 }
 
-int Sixmok::input(Player player, int x, int y)
+void Sixmok::input()
 {
-	if( move[y][x] == playerA
-		|| move[y][x] == playerB )	{
-		// 이미 돌이 존재. 에러메시지 1 return
-		return 1;	
+	int x, y;
+	string msg[2] = {"의 첫 번째 수의 위치를 입력해주세요 (x, y) : ",
+					 "의 두 번째 수의 위치를 입력해주세요 (x, y) : "};
+
+	for(int i=0; i<2; i++)	{
+		// 첫 번째 turn에 대해 예외처리.
+		if( count == 1 && i == 1 )	
+			break;	
+
+		cout << "플레이어" << static_cast<char>('A'+nowTurn-1) << msg[i];
+		cin >> x >> y;
+
+		if( move[y][x] == playerA
+			|| move[y][x] == playerB )	{
+			cout << "이미 돌이 놓여져 있는 자리입니다." << endl;
+			i--;
+			continue;
+		}
+		else if( x > 1 && x < BOARD_SIZE-1 
+				 && y > 1 && y < BOARD_SIZE-1 )	{
+			move[y][x] = nowTurn;	
+		}
+		else	{
+			cout << "판의 범위를 넘어섰거나 잘못 입력하셨습니다. 허용 범위는 (1~17)입니다." << endl;
+			i--;
+			continue;
+		}
+		
+		printBoard();
 	}
-	else if( x < 1 || x > BOARD_SIZE-1 
-			|| y < 1 || y > BOARD_SIZE-1 )	{
-		// 허용 범위가 넘어섬. 에러메시지 2 return
-		return 2;
-	}
-	
-	board[y][x] = player;
-	return 0;	// 정상 수행
 }
