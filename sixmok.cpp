@@ -1,43 +1,42 @@
-#include <iostream>
-using namespace std;
-
-#define BOARD_SIZE 18
-
-class Sixmok
-{
-public:
-	Sixmok();
-	void printBoard();
-
-private:
-	string board[BOARD_SIZE][BOARD_SIZE];
-};
-
-int main()
-{
-
-}
+#include "sixmok.h"
 
 Sixmok::Sixmok()
 {
+	initBoard();
 	printBoard();
+}
+
+void Sixmok::initBoard()
+{
+	// 모서리
+    board[0][0] = "┌", 
+    board[0][BOARD_SIZE-1] = "┐", 
+    board[BOARD_SIZE-1][0] = "└", 
+    board[BOARD_SIZE-1][BOARD_SIZE-1] = "┘";
+ 
+ 	// 몸통
+    for(int i=1; i<BOARD_SIZE-1; i++)
+    {
+        board[0][i] = "┬";
+        board[i][0] = "├";
+        board[i][BOARD_SIZE-1] = "┤";
+        board[BOARD_SIZE-1][i] = "┴";
+        
+        for(int j=1; j<18; j++)
+        {
+            board[i][j] = "┼";
+        }
+    }
 }
 
 void Sixmok::printBoard()
 {
-	// 모서리
-    table[0][0]="┌", table[0][18]="┐", table[18][0]="└", table[18][18]="┘";
- 
-    for(int i=1; i<18; i++)
-    {
-        table[0][i]="┬";
-        table[i][0]="├";
-        table[i][18]="┤";
-        table[18][i]="┴";
-        
-        for(int j=1; j<18; j++)
-        {
-            table[i][j]="┼";
-        }
-    }
+	system("clear");
+	for(int i=0; i<BOARD_SIZE; i++)	{
+		for(int j=0; j<BOARD_SIZE; j++)
+			cout << board[i][j];
+		cout << " " << i << endl;
+	}
+	cout << "0123456789111111111" << endl;
+	cout << "          012345678" << endl << endl;
 }
