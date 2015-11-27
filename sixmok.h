@@ -30,8 +30,12 @@ public:
 	void printBoard();
 	void reset();
 	void playerInput();
+	void computerInput();
 	void nextTurn();
 	void findConnection();
+	void calculateWeight();
+	void moveStone(int x, int y);
+	void findPosition(int &x, int &y);
 	int recursiveCount(int x, int y, int cnt, int dir);
 
 private:
@@ -39,6 +43,10 @@ private:
 	string board[BOARD_SIZE][BOARD_SIZE];
 	// 돌의 위치를 나타내는 배열
 	int move[BOARD_SIZE][BOARD_SIZE];
+	// 판에서 유망함을 나타내는 배열
+	int promising[BOARD_SIZE][BOARD_SIZE];
+	// 판에서 상대편의 돌의 유망함을 나타내는 배열
+	int danger[BOARD_SIZE][BOARD_SIZE];
 	// 현재 게임이 실행중인지를 나타내는 변수
 	bool isPlay;
 	// 현재 차례의 Player

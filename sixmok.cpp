@@ -36,15 +36,14 @@ void Sixmok::play()
 {
 	isPlay = true;
 
+
 	while( isPlay )	{
 		// 판 그리기
 		printBoard();	
 		// 사용자로부터 돌 입력 받기
 		playerInput();
 		// 인공지능으로부터 돌 입력 받기
-
-		// 다음 차례로 변경
-		nextTurn();
+		computerInput();
 	}
 }
 
@@ -107,23 +106,22 @@ void Sixmok::playerInput()
 					 "의 두 번째 수의 위치를 입력해주세요 (x, y) : "};
 
 	for(int i=0; i<2; i++)	{
-		// 첫 번째 수에 대해 예외처리.
+		// 첫 번째 수에 대해 예외처리.  
 		if( number == 1 && i == 1 )	
 			break;	
-		// 비정상적인 입력 예외처리 필요
+		// 비정상적인 입력 예외처리 필요 
 		cout << "플레이어" << static_cast<char>('A'+nowTurn-1) << msg[i];
 		cin >> x >> y;
-		if( x > 0 && x < 18 && y < 0 && y < 18 )	{
+		
+		if( x > 0 && x < BOARD_SIZE-1 && y > 0 && y < BOARD_SIZE-1 )	{
 			if( move[y][x] == playerA
 				|| move[y][x] == playerB )	{
 				cout << "이미 돌이 놓여져있는 자리입니다." << endl;
 				i--;
 				continue;
 			}
-			else if( x >= 1 && x < BOARD_SIZE-1 
-					&& y >= 1 && y < BOARD_SIZE-1 )	{
-				move[y][x] = nowTurn;	
-			}
+	
+			moveStone(x, y);
 		}
 		else	{
 			cout << "판의 범위를 넘어섰거나 잘못 입력하셨습니다. 허용 범위는 (1~17)입니다." << endl;
@@ -134,24 +132,93 @@ void Sixmok::playerInput()
 			continue;
 		}
 		
+		// 연속된 돌 갱신
 		findConnection();
-
+		// 판 갱신
 		printBoard();
 	}
+	
+	nextTurn();
 }
 
-void Sixmok::findConnection()
+void Sixmok::computerInput()
 {
-	memset(consecutiveMove, 0, sizeof(consecutiveMove));
+	int x, y;
+
+	for(int i=0; i<2; i++)	{
+		// 연속된 돌 가중치 계산
+		calculateWeight();
+		// 계산된 가중치로 놓을 돌의 위치 찾기
+		findPosition(x, y);
+		// 돌 놓기
+		moveStone(x, y);
+		// 판 갱신
+		printBoard();
+	}
+
+	nextTurn();
+}
+
+void Sixmok::moveStone(int x, int y)
+{
+	move[x][y] = nowTurn;
+}
+
+void Sixmok::findPosition(int &x, int &y)
+{
+	int max = -1;
 
 	for(int i=1; i<BOARD_SIZE-1; i++)	{
 		for(int j=1; j<BOARD_SIZE-1; j++)	{
-			for(int k=2; k<=5; k++)	{
-				if( move[i][j] != empty )	{
-					int oppositeDir = (k + 4) % 8;
-					
+			if( max < promising[i][j] )	{
+				max = promising[i][j];
+				x = j;
+				y = i;
+			}
+			if( max < danger[i][j] )	{
+				max = danger[i][j];
+				x = j;
+				y = i;
+			}
+		}
+	}
+}
+
+void Sixmok::calculateWeight()
+{	
+	memset(danger, 0, sizeof(danger));
+	memset(promising, 0, sizeof(promising));
+
+	for(int i=1; i<BOARD_SIZE-1; i++)	{
+		for(int j=1; j<BOARD_SIZE-1; j++)	{
+			if( move[i][j] == empty )	{
+				for(int k=0; k<8; k++)	{
+					if( move[i+direction[k][0]][j+direction[k][1]] != empty )
+					{
+						if( move[i+direction[k][0]][j+direction[k][1]] == nowTurn )	{
+							promising[i][j] += recursiveCount(j, i, 1, k);
+						}
+						else	{
+							danger[i][j] += recursiveCount(j, i, 1, k);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void Sixmok::findConnection() 
+{
+	memset(consecutiveMove, 0, sizeof(consecutiveMove)); 
+
+	for(int i=1; i<BOARD_SIZE-1; i++)	{ 
+		for(int j=1; j<BOARD_SIZE-1; j++)	{ 
+			for(int k=2; k<=5; k++)	{ 
+				if( move[i][j] != empty )	{ 
+					int oppositeDir = (k + 4) % 8; 
 					if( move[i][j] == move[i+direction[k][0]][j+direction[k][1]] 
-						&& move[i][j] != move[i+direction[oppositeDir][0]][j+direction[oppositeDir][1]] )
+						&& move[i][j] != move[i+direction[oppositeDir][0]][j+direction[oppositeDir][1]] ) 
 					{
 						int cnt = recursiveCount(j, i, 1, k);
 						int turn = move[i][j];
