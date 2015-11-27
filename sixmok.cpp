@@ -140,7 +140,7 @@ void Sixmok::findConnection()
 
 	for(int i=1; i<BOARD_SIZE-1; i++)	{
 		for(int j=1; j<BOARD_SIZE-1; j++)	{
-			for(int k=2; k<=4; k++)	{
+			for(int k=2; k<=5; k++)	{
 				if( move[i][j] != empty )	{
 					int oppositeDir = (k + 4) % 8;
 					
