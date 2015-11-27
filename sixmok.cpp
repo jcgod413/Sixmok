@@ -211,9 +211,9 @@ void Sixmok::calculateWeight()
 								newX = j + (direction[k][1] * l);
 								newY = i + (direction[k][0] * l);
 
-								if( move[i][j] == move[newY][newX] )
+								if( move[i+direction[k][0]][j+direction[k][1]] == move[newY][newX] )
 									newCnt++;
-								else if( move[i][j] != move[newY][newX] &&
+								else if( move[i+direction[k][0]][j+direction[k][1]] != move[newY][newX] &&
 										 move[newY][newX] != empty )
 									break;
 							}
@@ -221,16 +221,20 @@ void Sixmok::calculateWeight()
 							if( newCnt >=4 )	{
 								cnt = CRITICAL * 2;
 								
-								for(int l=0; l<=7; l++)	{
+								for(int l=1; l<=6; l++)	{
 									newX = j + (direction[k][1] * l);
 									newY = i + (direction[k][0] * l);
 
 									if( move[newY][newX] == empty )
+									{
 										promising[newY][newX] = cnt;									
+										cout << i << ", " << j << "  newX : " << newX << ", newY : " << newY << endl;
+										break;
+									}
 								}
 							}
-							else
-								promising[i][j] += cnt;
+							//else
+							promising[i][j] += cnt;
 						}
 						else	{
 							int newCnt = 0;
@@ -238,9 +242,9 @@ void Sixmok::calculateWeight()
 								newX = j + (direction[k][1] * l);
 								newY = i + (direction[k][0] * l);
 								
-								if( move[i][j] == move[newY][newX] )
+								if( move[i+direction[k][0]][j+direction[k][1]] == move[newY][newX] )
 									newCnt++;
-								else if( move[i][j] != move[newY][newX] &&
+								else if( move[i+direction[k][0]][j+direction[k][1]] != move[newY][newX] &&
 										 move[newY][newX] != empty )
 									break;
 							}
@@ -248,16 +252,23 @@ void Sixmok::calculateWeight()
 							if( newCnt >= 4 )	{
 								cnt = CRITICAL;
 
-								for(int l=0; l<=7; l++)	{
+								for(int l=1; l<=6; l++)	{
+								//	if( newCnt == 5 && i == 7 )	
+								//		break;
+
 									newX = j + (direction[k][1] * l);
 									newY = i + (direction[k][0] * l);
 
 									if( move[newY][newX] == empty )
+									{
 										danger[newY][newX] = cnt;
+										cout << i << ", " << j << "  newX : " << newX << ", newY : " << newY << endl;
+										break;
+									}
 								}
 							}
-							else
-								danger[i][j] += cnt; 
+						//	else
+							danger[i][j] += cnt; 
 						}
 					}
 				}
