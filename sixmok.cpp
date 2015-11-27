@@ -161,7 +161,7 @@ void Sixmok::computerInput()
 
 void Sixmok::moveStone(int x, int y)
 {
-	move[x][y] = nowTurn;
+	move[y][x] = nowTurn;
 }
 
 void Sixmok::findPosition(int &x, int &y)
@@ -182,6 +182,10 @@ void Sixmok::findPosition(int &x, int &y)
 			}
 		}
 	}
+	cout << "max : " << max << endl;
+	cout << x << ", " << y << endl;
+	cout << "promising[y][x] = " << promising[y][x] << endl;
+	cout << "danger[y][x] = " << danger[y][x] << endl;
 }
 
 void Sixmok::calculateWeight()
@@ -196,10 +200,10 @@ void Sixmok::calculateWeight()
 					if( move[i+direction[k][0]][j+direction[k][1]] != empty )
 					{
 						if( move[i+direction[k][0]][j+direction[k][1]] == nowTurn )	{
-							promising[i][j] += recursiveCount(j, i, 1, k);
+							promising[i][j] += recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
 						}
 						else	{
-							danger[i][j] += recursiveCount(j, i, 1, k);
+							danger[i][j] += recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
 						}
 					}
 				}
