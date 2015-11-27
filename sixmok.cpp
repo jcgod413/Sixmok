@@ -39,8 +39,10 @@ void Sixmok::play()
 	while( isPlay )	{
 		// 판 그리기
 		printBoard();	
-		// 사용자로부터 돌의 입력 받기
-		input();
+		// 사용자로부터 돌 입력 받기
+		playerInput();
+		// 인공지능으로부터 돌 입력 받기
+
 		// 다음 차례로 변경
 		nextTurn();
 	}
@@ -98,32 +100,36 @@ void Sixmok::stop()
 	isPlay = false;
 }
 
-void Sixmok::input()
+void Sixmok::playerInput()
 {
 	int x, y;
 	string msg[2] = {"의 첫 번째 수의 위치를 입력해주세요 (x, y) : ",
 					 "의 두 번째 수의 위치를 입력해주세요 (x, y) : "};
 
 	for(int i=0; i<2; i++)	{
-		// 첫 번째 turn에 대해 예외처리.
+		// 첫 번째 수에 대해 예외처리.
 		if( number == 1 && i == 1 )	
 			break;	
-
+		// 비정상적인 입력 예외처리 필요
 		cout << "플레이어" << static_cast<char>('A'+nowTurn-1) << msg[i];
 		cin >> x >> y;
-
-		if( move[y][x] == playerA
-			|| move[y][x] == playerB )	{
-			cout << "이미 돌이 놓여져있는 자리입니다." << endl;
-			i--;
-			continue;
-		}
-		else if( x >= 1 && x < BOARD_SIZE-1 
-				 && y >= 1 && y < BOARD_SIZE-1 )	{
-			move[y][x] = nowTurn;	
+		if( x > 0 && x < 18 && y < 0 && y < 18 )	{
+			if( move[y][x] == playerA
+				|| move[y][x] == playerB )	{
+				cout << "이미 돌이 놓여져있는 자리입니다." << endl;
+				i--;
+				continue;
+			}
+			else if( x >= 1 && x < BOARD_SIZE-1 
+					&& y >= 1 && y < BOARD_SIZE-1 )	{
+				move[y][x] = nowTurn;	
+			}
 		}
 		else	{
 			cout << "판의 범위를 넘어섰거나 잘못 입력하셨습니다. 허용 범위는 (1~17)입니다." << endl;
+			cin.clear();
+			fflush(stdin);
+			cout << x << " " << y << endl;
 			i--;
 			continue;
 		}

@@ -29,7 +29,7 @@ public:
 	void init();
 	void printBoard();
 	void reset();
-	void input();
+	void playerInput();
 	void nextTurn();
 	void findConnection();
 	int recursiveCount(int x, int y, int cnt, int dir);
