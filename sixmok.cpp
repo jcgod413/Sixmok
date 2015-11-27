@@ -36,7 +36,6 @@ void Sixmok::play()
 {
 	isPlay = true;
 
-
 	while( isPlay )	{
 		// 판 그리기
 		printBoard();	
@@ -97,6 +96,8 @@ void Sixmok::reset()
 void Sixmok::stop()
 {
 	isPlay = false;
+	cout << "게임이 종료됩니다." << endl;
+	exit(1);
 }
 
 void Sixmok::playerInput()
@@ -152,6 +153,8 @@ void Sixmok::computerInput()
 		findPosition(x, y);
 		// 돌 놓기
 		moveStone(x, y);
+		// 연속된 돌 갱신
+		findConnection();
 		// 판 갱신
 		printBoard();
 	}
@@ -199,11 +202,62 @@ void Sixmok::calculateWeight()
 				for(int k=0; k<8; k++)	{
 					if( move[i+direction[k][0]][j+direction[k][1]] != empty )
 					{
+						int newX, newY;
+						int cnt = recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
+
 						if( move[i+direction[k][0]][j+direction[k][1]] == nowTurn )	{
-							promising[i][j] += recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
+							int newCnt = 0;
+							for(int l=1; l<=6; l++)	{
+								newX = j + (direction[k][1] * l);
+								newY = i + (direction[k][0] * l);
+
+								if( move[i][j] == move[newY][newX] )
+									newCnt++;
+								else if( move[i][j] != move[newY][newX] &&
+										 move[newY][newX] != empty )
+									break;
+							}
+
+							if( newCnt >=4 )	{
+								cnt = CRITICAL * 2;
+								
+								for(int l=0; l<=7; l++)	{
+									newX = j + (direction[k][1] * l);
+									newY = i + (direction[k][0] * l);
+
+									if( move[newY][newX] == empty )
+										promising[newY][newX] = cnt;									
+								}
+							}
+							else
+								promising[i][j] += cnt;
 						}
 						else	{
-							danger[i][j] += recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
+							int newCnt = 0;
+							for(int l=1; l<=6; l++)	{
+								newX = j + (direction[k][1] * l);
+								newY = i + (direction[k][0] * l);
+								
+								if( move[i][j] == move[newY][newX] )
+									newCnt++;
+								else if( move[i][j] != move[newY][newX] &&
+										 move[newY][newX] != empty )
+									break;
+							}
+					
+							if( newCnt >= 4 )	{
+								cnt = CRITICAL;
+
+								for(int l=0; l<=7; l++)	{
+									newX = j + (direction[k][1] * l);
+									newY = i + (direction[k][0] * l);
+
+									if( move[newY][newX] == empty )
+										danger[newY][newX] = cnt;
+								}
+							}
+							else
+								danger[i][j] += cnt; 
 						}
 					}
 				}
