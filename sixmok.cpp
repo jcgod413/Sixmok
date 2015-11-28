@@ -196,87 +196,52 @@ void Sixmok::calculateWeight()
 	memset(danger, 0, sizeof(danger));
 	memset(promising, 0, sizeof(promising));
 
+	int cnt = 0;
+
 	for(int i=1; i<BOARD_SIZE-1; i++)	{
 		for(int j=1; j<BOARD_SIZE-1; j++)	{
 			if( move[i][j] == empty )	{
 				for(int k=0; k<8; k++)	{
-					if( move[i+direction[k][0]][j+direction[k][1]] != empty )
-					{
-						int newX, newY;
-						int cnt = recursiveCount(j+direction[k][1], i+direction[k][0], 1, k);
+					int newI = i + direction[k][0];
+					int newJ = j + direction[k][1];
+			
+					if( move[newI][newJ] != empty )	{
+						cnt = recursiveCount(newJ, newI, 1, k);
 
-						if( move[i+direction[k][0]][j+direction[k][1]] == nowTurn )	{
-							int newCnt = 0;
-							for(int l=1; l<=6; l++)	{
-								newX = j + (direction[k][1] * l);
-								newY = i + (direction[k][0] * l);
+						int newCnt = 0;
+						for(int l=0; l<6; l++)	{
+							int newI2 = newI + (direction[k][0] * l);
+							int newJ2 = newJ + (direction[k][1] * l);
 
-								if( move[i+direction[k][0]][j+direction[k][1]] == move[newY][newX] )
-									newCnt++;
-								else if( move[i+direction[k][0]][j+direction[k][1]] != move[newY][newX] &&
-										 move[newY][newX] != empty )
-									break;
+							if( move[newI][newJ] == move[newI2][newJ2] )	{
+								newCnt++;
 							}
+							else if( move[newI2][newJ2] != empty )	{
+								break;
+							}
+						}
 
-							if( newCnt >=4 )	{
-								cnt = CRITICAL * 2;
-								
-								for(int l=1; l<=6; l++)	{
-									newX = j + (direction[k][1] * l);
-									newY = i + (direction[k][0] * l);
+						if( newCnt >= 4 )	{
+							for(int l=0; l<=6; l++)	{
+								int newI2 = newI + (direction[k][0] * l);
+								int newJ2 = newJ + (direction[k][1] * l);
 
-									if( move[newY][newX] == empty )
-									{
-										promising[newY][newX] = cnt;									
-										cout << i << ", " << j << "  newX : " << newX << ", newY : " << newY << endl;
+								if( move[newI2][newJ2] == empty )	{
+									danger[newI2][newJ2] = CRITICAL;
+									
+									if( move[newI2+direction[k][0]][newJ2+direction[k][1]] == empty )
 										break;
-									}
 								}
 							}
-							//else
-							promising[i][j] += cnt;
 						}
-						else	{
-							int newCnt = 0;
-							for(int l=1; l<=6; l++)	{
-								newX = j + (direction[k][1] * l);
-								newY = i + (direction[k][0] * l);
-								
-								if( move[i+direction[k][0]][j+direction[k][1]] == move[newY][newX] )
-									newCnt++;
-								else if( move[i+direction[k][0]][j+direction[k][1]] != move[newY][newX] &&
-										 move[newY][newX] != empty )
-									break;
-							}
-					
-							if( newCnt >= 4 )	{
-								cnt = CRITICAL;
-
-								for(int l=1; l<=6; l++)	{
-								//	if( newCnt == 5 && i == 7 )	
-								//		break;
-
-									newX = j + (direction[k][1] * l);
-									newY = i + (direction[k][0] * l);
-
-									if( move[newY][newX] == empty )
-									{
-										danger[newY][newX] = cnt;
-										cout << i << ", " << j << "  newX : " << newX << ", newY : " << newY << endl;
-										break;
-									}
-								}
-							}
-						//	else
-							danger[i][j] += cnt; 
-						}
+						
+						danger[i][j] += pow(2, cnt);
 					}
 				}
 			}
 		}
 	}
 }
-
 void Sixmok::findConnection() 
 {
 	memset(consecutiveMove, 0, sizeof(consecutiveMove)); 
