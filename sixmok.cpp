@@ -145,10 +145,11 @@ void Sixmok::playerInput()
 void Sixmok::computerInput()
 {
 	int x, y;
+	
+	// 가중치 계산하기
+	calculateWeight();
 
 	for(int i=0; i<2; i++)	{
-		// 연속된 돌 가중치 계산
-		calculateWeight();
 		// 계산된 가중치로 놓을 돌의 위치 찾기
 		findPosition(x, y);
 		// 돌 놓기
@@ -173,6 +174,9 @@ void Sixmok::findPosition(int &x, int &y)
 
 	for(int i=1; i<BOARD_SIZE-1; i++)	{
 		for(int j=1; j<BOARD_SIZE-1; j++)	{
+			if( move[i][j] != empty )
+				continue;
+
 			if( max < promising[i][j] )	{
 				max = promising[i][j];
 				x = j;
@@ -221,7 +225,7 @@ void Sixmok::calculateWeight()
 							}
 						}
 
-						if( newCnt >= 4 )	{
+						if( newCnt == 4 )	{
 							for(int l=0; l<=6; l++)	{
 								int newI2 = newI + (direction[k][0] * l);
 								int newJ2 = newJ + (direction[k][1] * l);
@@ -229,7 +233,7 @@ void Sixmok::calculateWeight()
 								if( move[newI2][newJ2] == empty )	{
 									danger[newI2][newJ2] = CRITICAL;
 									
-									if( move[newI2+direction[k][0]][newJ2+direction[k][1]] == empty )
+									if( move[newI2+direction[k][0]][newJ2+direction[k][1]] == empty )	
 										break;
 								}
 							}
