@@ -1,5 +1,9 @@
 #include <iostream>
+#include <string>
+#include <stdlib.h>
 #include <math.h>
+#include <time.h>
+#include "MySocket.h"
 
 using namespace std;
 
@@ -11,7 +15,10 @@ enum Player {
 	playerA = 1,
 	playerB = 2
 };
-
+enum gameMode	{
+	Server=1,
+	Client=2
+};
 enum Direction	{
 	Top,
 	Right_Top,
@@ -22,17 +29,28 @@ enum Direction	{
 	Left,
 	Left_Top
 };
+enum Participant	{
+	People=1,
+	Computer=2
+};
+
+typedef struct{
+	int x,y;
+	int win;//0:game running, 1:sever win ,2:client win
+	int turn;//1:sever turn ,2:client turn
+}GAME_DATA;
 
 class Sixmok
 {
 public:
-	Sixmok();
+	Sixmok(int, int);
 	void play();
 	void stop();
 	void init();
 	void printBoard();
 	void reset();
 	void playerInput();
+	void playerInput2();
 	void computerInput();
 	void nextTurn();
 	void findConnection();
@@ -42,23 +60,23 @@ public:
 	int recursiveCount(int x, int y, int cnt, int dir);
 
 private:
-	// íŒì˜ ê·¸ë¦¼ì„ ë‹´ê³ ìˆëŠ” ë°°ì—´
+	// ÆÇÀÇ ±×¸²À» ´ã°íÀÖ´Â ¹è¿­
 	string board[BOARD_SIZE][BOARD_SIZE];
-	// ëŒì˜ ìœ„ì¹˜ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë°°ì—´
+	// µ¹ÀÇ À§Ä¡¸¦ ³ªÅ¸³»´Â ¹è¿­
 	int move[BOARD_SIZE][BOARD_SIZE];
-	// íŒì—ì„œ ìœ ë§í•¨ì„ ë‚˜íƒ€ë‚´ëŠ” ë°°ì—´
+	// ÆÇ¿¡¼­ À¯¸ÁÇÔÀ» ³ªÅ¸³»´Â ¹è¿­
 	int promising[BOARD_SIZE][BOARD_SIZE];
-	// íŒì—ì„œ ìƒëŒ€í¸ì˜ ëŒì˜ ìœ ë§í•¨ì„ ë‚˜íƒ€ë‚´ëŠ” ë°°ì—´
+	// ÆÇ¿¡¼­ »ó´ëÆíÀÇ µ¹ÀÇ À¯¸ÁÇÔÀ» ³ªÅ¸³»´Â ¹è¿­
 	int danger[BOARD_SIZE][BOARD_SIZE];
-	// í˜„ì¬ ê²Œì„ì´ ì‹¤í–‰ì¤‘ì¸ì§€ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜
+	// ÇöÀç °ÔÀÓÀÌ ½ÇÇàÁßÀÎÁö¸¦ ³ªÅ¸³»´Â º¯¼ö
 	bool isPlay;
-	// í˜„ì¬ ì°¨ë¡€ì˜ Player
+	// ÇöÀç Â÷·ÊÀÇ Player
 	Player nowTurn;
-	// í˜„ì¬ ìˆ˜ì˜ ë²ˆí˜¸ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜
+	// ÇöÀç ¼öÀÇ ¹øÈ£¸¦ ³ªÅ¸³»´Â º¯¼ö
 	int number;
-	// 8ë°©í–¥ì˜ ê°’ì„ ë‚˜íƒ€ë‚´ëŠ” ë°°ì—´
-	int direction[8][2] = { {-1, 0}, {-1, 1}, {0, 1},  {1, 1},
-					  {1, 0},  {1, -1}, {0, -1}, {-1, -1} };
-	// ì—°ì†ì ì¸ ëŒì˜ ì¡°í•©ì„ ë‹´ëŠ” ë°°ì—´
-	int consecutiveMove[10];
+	// ¿¬¼ÓÀûÀÎ µ¹ÀÇ Á¶ÇÕÀ» ´ã´Â ¹è¿­
+	int consecutiveMove[12];
+	int gameMode;
+	int participant;
+	GAME_DATA gameData;
 };

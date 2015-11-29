@@ -1,6 +1,13 @@
 #include "sixmok.h"
 
-Sixmok::Sixmok()
+// 8πÊ«‚¿« ∞™¿ª ≥™≈∏≥ª¥¬ πËø≠
+int direction[8][2] = { {-1, 0}, {-1, 1}, {0, 1},  {1, 1},
+						{1, 0},  {1, -1}, {0, -1}, {-1, -1} };
+
+MySocket player(sizeof(GAME_DATA));
+
+Sixmok::Sixmok(int mode, int p) : gameMode(mode),
+			participant(p)
 {
 	init();
 }
@@ -11,25 +18,39 @@ void Sixmok::init()
 	nowTurn = playerA;
 	number = 1;
 
-	// Î™®ÏÑúÎ¶¨
-    board[0][0] = "‚îå", 
-    board[0][BOARD_SIZE-1] = "‚îê", 
-    board[BOARD_SIZE-1][0] = "‚îî", 
-    board[BOARD_SIZE-1][BOARD_SIZE-1] = "‚îò";
+	srand(time(NULL));
+
+	memset(move, 0, sizeof(move));
+	memset(consecutiveMove, 0, sizeof(consecutiveMove));
+
+	// ∏º≠∏Æ
+    board[0][0] = "¶£", 
+    board[0][BOARD_SIZE-1] = "¶§", 
+    board[BOARD_SIZE-1][0] = "¶¶", 
+    board[BOARD_SIZE-1][BOARD_SIZE-1] = "¶•";
  
- 	// Î™∏ÌÜµ
+ 	// ∏ˆ≈Î
     for(int i=1; i<BOARD_SIZE-1; i++)
     {
-        board[0][i] = "‚î¨";
-        board[i][0] = "‚îú";
-        board[i][BOARD_SIZE-1] = "‚î§";
-        board[BOARD_SIZE-1][i] = "‚î¥";
+        board[0][i] = "¶®";
+        board[i][0] = "¶ß";
+        board[i][BOARD_SIZE-1] = "¶©";
+        board[BOARD_SIZE-1][i] = "¶™";
         
         for(int j=1; j<18; j++)
         {
-            board[i][j] = "‚îº";
+            board[i][j] = "¶´";
         }
     }
+
+	if( gameMode == Server )	{
+		player.ServerSetting();
+		player.ServerRun();
+	}
+	else    {
+		player.ClientSetting();
+		player.ClientRun();
+	}
 }
 
 void Sixmok::play()
@@ -37,46 +58,82 @@ void Sixmok::play()
 	isPlay = true;
 
 	while( isPlay )	{
-		// Ìåê Í∑∏Î¶¨Í∏∞
-		printBoard();	
-		// ÏÇ¨Ïö©ÏûêÎ°úÎ∂ÄÌÑ∞ Îèå ÏûÖÎ†• Î∞õÍ∏∞
-		playerInput();
-		// Ïù∏Í≥µÏßÄÎä•ÏúºÎ°úÎ∂ÄÌÑ∞ Îèå ÏûÖÎ†• Î∞õÍ∏∞
-		computerInput();
+		// ∆« ±◊∏Æ±‚
+		printBoard();
+
+		if( gameMode == Client )	{
+			// ªÁøÎ¿⁄∑Œ∫Œ≈Õ µπ ¿‘∑¬ πﬁ±‚
+			if( participant == People )	{
+				playerInput();
+				playerInput2();
+				// ªÁ∂˜¿Ã ¿‘∑¬
+			}
+			else
+			{
+				playerInput();
+				// ¿Œ∞¯¡ˆ¥…¿∏∑Œ∫Œ≈Õ µπ ¿‘∑¬ πﬁ±‚
+				computerInput();
+			}
+		}
+		else if( gameMode == Server )	{		
+			if( participant == People )	{
+				// ªÁ∂˜¿Ã ¿‘∑¬
+				playerInput2();
+				playerInput();
+			}
+			else
+			{				
+				// ¿Œ∞¯¡ˆ¥…¿∏∑Œ∫Œ≈Õ µπ ¿‘∑¬ πﬁ±‚
+				computerInput();
+				// ªÁøÎ¿⁄∑Œ∫Œ≈Õ µπ ¿‘∑¬ πﬁ±‚
+				playerInput();
+			}
+		}
 	}
 }
 
 void Sixmok::printBoard()
 {
-	string msg[2] = {"PlayerA", "PlayerB"};
-
-	system("clear");
+	string msg[2] = {"Server", "Client"};
+	board[5][5] = 1;
+	system("cls");
+	board[5][5] = "¶´";
 	for(int i=0; i<BOARD_SIZE; i++)	{
 		for(int j=0; j<BOARD_SIZE; j++)	{
 			switch( move[i][j])	{
-				case empty:		cout << board[i][j];	break;
-				case playerA:	cout << "‚óã";			break;
-				case playerB:	cout << "‚óè";			break;
+				case 0:	cout << board[i][j];	break;
+				case 1:	cout << "°€";			break;
+				case 2:	cout << "°‹";			break;
 			}		
 		}
 			
 		cout << " " << i;
 		if( i < 10 )	{
-			cout << "\t\t" << msg[i/5] << "Ïùò " << (i % 5) + 2 << "Í∞ú Ïó∞ÏÜç Í∞úÏàò " << consecutiveMove[i];
+			cout << "\t" << msg[i/5] << "¿« ø¨º”" << (i % 5) + 2 << "∞≥ ∞≥ºˆ " << consecutiveMove[i];
+		}
+		else if( i == 10 )	{
+			cout << "\t" << "Server ¿¸√º µπ¿« ∞≥ºˆ : " << consecutiveMove[10];
+		}
+		else if( i == 11 )	{
+			cout << "\t" << "Client ¿¸√º µπ¿« ∞≥ºˆ : " << consecutiveMove[11];
 		}
 		cout << endl;
 	}
-	cout << "0123456789111111111" << endl;
-	cout << "          012345678" << endl << endl;
+	cout << "0 1 2 3 4 5 6 7 8 9 1 1 1 1 1 1 1 1 1" << endl;
+	cout << "                    0 1 2 3 4 5 6 7 8" << endl << endl;
 
 	if( consecutiveMove[4] == 1 )
 	{
-		cout << msg[0] << "ÏäπÎ¶¨!" << endl;
+		cout << msg[0] << "Ω¬∏Æ!" << endl;
 		stop();
 	}
 	else if( consecutiveMove[9] == 1 )
 	{
-		cout << msg[1] << "ÏäπÎ¶¨!" << endl;
+		cout << msg[1] << "Ω¬∏Æ!" << endl;
+		stop();
+	}
+	else if( consecutiveMove[10]+consecutiveMove[11] == 17*17 )	{
+		cout << "π´Ω¬∫Œ ¿‘¥œ¥Ÿ!" << endl;
 		stop();
 	}
 }
@@ -96,28 +153,31 @@ void Sixmok::reset()
 void Sixmok::stop()
 {
 	isPlay = false;
-	cout << "Í≤åÏûÑÏù¥ Ï¢ÖÎ£åÎê©ÎãàÎã§." << endl;
+	cout << "∞‘¿”¿Ã ¡æ∑·µÀ¥œ¥Ÿ." << endl;
 	exit(1);
 }
 
 void Sixmok::playerInput()
 {
 	int x, y;
-	string msg[2] = {"Ïùò Ï≤´ Î≤àÏß∏ ÏàòÏùò ÏúÑÏπòÎ•º ÏûÖÎ†•Ìï¥Ï£ºÏÑ∏Ïöî (x, y) : ",
-					 "Ïùò Îëê Î≤àÏß∏ ÏàòÏùò ÏúÑÏπòÎ•º ÏûÖÎ†•Ìï¥Ï£ºÏÑ∏Ïöî (x, y) : "};
+	string msg[2] = {"¿« √π π¯¬∞ ºˆ¿« ¿ßƒ°∏¶ ¿‘∑¬«ÿ¡÷ººø‰ (x, y) : ",
+					 "¿« µŒ π¯¬∞ ºˆ¿« ¿ßƒ°∏¶ ¿‘∑¬«ÿ¡÷ººø‰ (x, y) : "};
 
 	for(int i=0; i<2; i++)	{
-		// Ï≤´ Î≤àÏß∏ ÏàòÏóê ÎåÄÌï¥ ÏòàÏô∏Ï≤òÎ¶¨.  
-		if( number == 1 && i == 1 )	
-			break;	
-		// ÎπÑÏ†ïÏÉÅÏ†ÅÏù∏ ÏûÖÎ†• ÏòàÏô∏Ï≤òÎ¶¨ ÌïÑÏöî 
-		cout << "ÌîåÎ†àÏù¥Ïñ¥" << static_cast<char>('A'+nowTurn-1) << msg[i];
-		cin >> x >> y;
 		
+		if( gameMode == Client && number == 1 && i == 1 )
+			break;
+
+		// ∫Ò¡§ªÛ¿˚¿Œ ¿‘∑¬ øπø‹√≥∏Æ « ø‰ 
+		cout << "«√∑π¿ÃæÓ" << static_cast<char>('A'+nowTurn-1) << msg[i];
+		player.RecvData(&gameData);
+		x = gameData.x;
+		y = gameData.y;
+
 		if( x > 0 && x < BOARD_SIZE-1 && y > 0 && y < BOARD_SIZE-1 )	{
 			if( move[y][x] == playerA
 				|| move[y][x] == playerB )	{
-				cout << "Ïù¥ÎØ∏ ÎèåÏù¥ ÎÜìÏó¨Ï†∏ÏûàÎäî ÏûêÎ¶¨ÏûÖÎãàÎã§." << endl;
+				cout << "¿ÃπÃ µπ¿Ã ≥ıø©¡Æ¿÷¥¬ ¿⁄∏Æ¿‘¥œ¥Ÿ." << endl;
 				i--;
 				continue;
 			}
@@ -125,7 +185,7 @@ void Sixmok::playerInput()
 			moveStone(x, y);
 		}
 		else	{
-			cout << "ÌåêÏùò Î≤îÏúÑÎ•º ÎÑòÏñ¥ÏÑ∞Í±∞ÎÇò ÏûòÎ™ª ÏûÖÎ†•ÌïòÏÖ®ÏäµÎãàÎã§. ÌóàÏö© Î≤îÏúÑÎäî (1~17)ÏûÖÎãàÎã§." << endl;
+			cout << "∆«¿« π¸¿ß∏¶ ≥—æÓºπ∞≈≥™ ¿ﬂ∏¯ ¿‘∑¬«œºÃΩ¿¥œ¥Ÿ. «„øÎ π¸¿ß¥¬ (1~17)¿‘¥œ¥Ÿ." << endl;
 			cin.clear();
 			fflush(stdin);
 			cout << x << " " << y << endl;
@@ -133,9 +193,56 @@ void Sixmok::playerInput()
 			continue;
 		}
 		
-		// Ïó∞ÏÜçÎêú Îèå Í∞±Ïã†
+		// ø¨º”µ» µπ ∞ªΩ≈
 		findConnection();
-		// Ìåê Í∞±Ïã†
+		// ∆« ∞ªΩ≈
+		printBoard();
+	}
+	
+	nextTurn();
+}
+
+void Sixmok::playerInput2()
+{
+	int x, y;
+	string msg[2] = {"¿« √π π¯¬∞ ºˆ¿« ¿ßƒ°∏¶ ¿‘∑¬«ÿ¡÷ººø‰ (x, y) : ",
+					 "¿« µŒ π¯¬∞ ºˆ¿« ¿ßƒ°∏¶ ¿‘∑¬«ÿ¡÷ººø‰ (x, y) : "};
+
+	for(int i=0; i<2; i++)	{
+		
+		if( gameMode == Server && number == 1 && i == 1 )
+			break;
+
+		// ∫Ò¡§ªÛ¿˚¿Œ ¿‘∑¬ øπø‹√≥∏Æ « ø‰ 
+		cout << "«√∑π¿ÃæÓ" << static_cast<char>('A'+nowTurn-1) << msg[i];
+		cin >> x >> y;
+		gameData.x = x;
+		gameData.y = y;
+		gameData.win = 0;
+		player.SendData(&gameData);
+		
+		if( x > 0 && x < BOARD_SIZE-1 && y > 0 && y < BOARD_SIZE-1 )	{
+			if( move[y][x] == playerA
+				|| move[y][x] == playerB )	{
+				cout << "¿ÃπÃ µπ¿Ã ≥ıø©¡Æ¿÷¥¬ ¿⁄∏Æ¿‘¥œ¥Ÿ." << endl;
+				i--;
+				continue;
+			}
+	
+			moveStone(x, y);
+		}
+		else	{
+			cout << "∆«¿« π¸¿ß∏¶ ≥—æÓºπ∞≈≥™ ¿ﬂ∏¯ ¿‘∑¬«œºÃΩ¿¥œ¥Ÿ. «„øÎ π¸¿ß¥¬ (1~17)¿‘¥œ¥Ÿ." << endl;
+			cin.clear();
+			fflush(stdin);
+			cout << x << " " << y << endl;
+			i--;
+			continue;
+		}
+		
+		// ø¨º”µ» µπ ∞ªΩ≈
+		findConnection();
+		// ∆« ∞ªΩ≈
 		printBoard();
 	}
 	
@@ -146,20 +253,38 @@ void Sixmok::computerInput()
 {
 	int x, y;
 	
-	// Í∞ÄÏ§ëÏπò Í≥ÑÏÇ∞ÌïòÍ∏∞
-//	calculateWeight();
-
 	for(int i=0; i<2; i++)	{
-		// Í∞ÄÏ§ëÏπò Í≥ÑÏÇ∞ÌïòÍ∏∞
-	calculateWeight();
+		// √π ºˆ
+		if( number == 1 && gameMode == Server )	{
+			x = (rand() % 7) + 6;	// 6~12
+			y = (rand() % 7) + 6;	// 6~12
+			moveStone(x, y);
 
-	// Í≥ÑÏÇ∞Îêú Í∞ÄÏ§ëÏπòÎ°ú ÎÜìÏùÑ ÎèåÏùò ÏúÑÏπò Ï∞æÍ∏∞
+			gameData.x = x;
+			gameData.y = y;
+			gameData.win = 0;
+			player.SendData(&gameData);
+			
+			findConnection();
+			printBoard();
+			break;
+		}
+		
+		// ∞°¡ﬂƒ° ∞ËªÍ«œ±‚
+		calculateWeight();
+		// ∞ËªÍµ» ∞°¡ﬂƒ°∑Œ ≥ı¿ª µπ¿« ¿ßƒ° √£±‚
 		findPosition(x, y);
-		// Îèå ÎÜìÍ∏∞
+		// µπ ≥ı±‚
 		moveStone(x, y);
-		// Ïó∞ÏÜçÎêú Îèå Í∞±Ïã†
+
+		gameData.x = x;
+		gameData.y = y;
+		gameData.win = 0;
+		player.SendData(&gameData);
+		
+		// ø¨º”µ» µπ ∞ªΩ≈
 		findConnection();
-		// Ìåê Í∞±Ïã†
+		// ∆« ∞ªΩ≈
 		printBoard();
 	}
 
@@ -192,10 +317,6 @@ void Sixmok::findPosition(int &x, int &y)
 			}
 		}
 	}
-	cout << "max : " << max << endl;
-	cout << x << ", " << y << endl;
-	cout << "promising[y][x] = " << promising[y][x] << endl;
-	cout << "danger[y][x] = " << danger[y][x] << endl;
 }
 
 void Sixmok::calculateWeight()
@@ -228,18 +349,23 @@ void Sixmok::calculateWeight()
 							}
 						}
 
-						if( newCnt >= 4  )	{
+						int t = 2;
+
+						if( newCnt == 4 && number % 2 == 1 )	{
 							for(int l=0; l<=6; l++)	{
 								int newI2 = i + (direction[k][0] * l);
 								int newJ2 = j + (direction[k][1] * l);
 
-								if( move[newI2][newJ2] == empty )	{
+								if( move[newI2][newJ2] == empty && t > 0 )	{
 									danger[newI2][newJ2] = CRITICAL;
-									
+									t--;
 									if( move[newI2+direction[k][0]][newJ2+direction[k][1]] == empty )	
 										break;
 								}
 							}
+						}
+						else if( newCnt >= 4 && number % 2 == 0 )	{
+							danger[i][j] += CRITICAL;
 						}
 						
 						danger[i][j] += pow(2, cnt);
@@ -268,6 +394,13 @@ void Sixmok::findConnection()
 						consecutiveMove[pos]++;
 					}
 				}
+			}
+
+			if( move[i][j] == playerA )	{
+				consecutiveMove[10]++;
+			}
+			else if( move[i][j] == playerB )	{
+				consecutiveMove[11]++;
 			}
 		}
 	}
