@@ -147,10 +147,13 @@ void Sixmok::computerInput()
 	int x, y;
 	
 	// 가중치 계산하기
-	calculateWeight();
+//	calculateWeight();
 
 	for(int i=0; i<2; i++)	{
-		// 계산된 가중치로 놓을 돌의 위치 찾기
+		// 가중치 계산하기
+	calculateWeight();
+
+	// 계산된 가중치로 놓을 돌의 위치 찾기
 		findPosition(x, y);
 		// 돌 놓기
 		moveStone(x, y);
@@ -225,10 +228,10 @@ void Sixmok::calculateWeight()
 							}
 						}
 
-						if( newCnt == 4 )	{
+						if( newCnt >= 4  )	{
 							for(int l=0; l<=6; l++)	{
-								int newI2 = newI + (direction[k][0] * l);
-								int newJ2 = newJ + (direction[k][1] * l);
+								int newI2 = i + (direction[k][0] * l);
+								int newJ2 = j + (direction[k][1] * l);
 
 								if( move[newI2][newJ2] == empty )	{
 									danger[newI2][newJ2] = CRITICAL;
