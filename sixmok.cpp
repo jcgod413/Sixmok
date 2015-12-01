@@ -183,7 +183,7 @@ void Sixmok::playerInput()
 			moveStone(x, y);
 		}
 		else	{
-			cout << "판의 범위를 넘어섰거나 잘못 입력하셨습니다. 허용 범위는 (1~17)입니다." << endl;
+			cout << "판의 범위를 넘어섰거나 잘못 입력하셨습니다. 허용 범위는 (0~16)입니다." << endl;
 			cin.clear();
 			fflush(stdin);
 			cout << x << " " << y << endl;
@@ -336,13 +336,18 @@ void Sixmok::calculateWeight()
 					if( move[newI][newJ] != empty )	{
 						cnt = recursiveCount(newJ, newI, 1, k);
 
-						if( newI < 0 || newJ < 0 || newI >= BOARD_SIZE || newJ >= BOARD_SIZE )
+						if( newI < 0 || newJ < 0 || 
+							newI >= BOARD_SIZE || newJ >= BOARD_SIZE )
 							continue;
 
 						int newCnt = 0;
 						for(int l=0; l<6; l++)	{
 							int newI2 = newI + (direction[k][0] * l);
 							int newJ2 = newJ + (direction[k][1] * l);
+
+							if( newI2 < 0 || newJ2 < 0 ||
+								newI2 >= BOARD_SIZE || newJ2 >= BOARD_SIZE )
+								continue;
 
 							if( move[newI][newJ] == move[newI2][newJ2] )	{
 								newCnt++;
@@ -387,7 +392,18 @@ void Sixmok::findConnection()
 			for(int k=2; k<=5; k++)	{ 
 				if( move[i][j] != empty )	{ 
 					int oppositeDir = (k + 4) % 8; 
-					if( move[i][j] == move[i+direction[k][0]][j+direction[k][1]] 
+					int newI = i+direction[k][0];
+					int newJ = j+direction[k][1];
+					int oppositeI = i+direction[oppositeDir][0];
+					int oppositeJ = j+direction[oppositeDir][1];
+
+					if( newI < 0 || oppositeI < 0 ||
+						newJ < 0 || oppositeJ < 0 ||
+						newI >= BOARD_SIZE || oppositeI >= BOARD_SIZE ||
+						newJ >= BOARD_SIZE || oppositeJ >= BOARD_SIZE )
+						continue;
+
+					if( move[i][j] == move[newI][newJ] 
 						&& move[i][j] != move[i+direction[oppositeDir][0]][j+direction[oppositeDir][1]] ) 
 					{
 						int cnt = recursiveCount(j, i, 1, k);
@@ -411,6 +427,10 @@ void Sixmok::findConnection()
 
 int Sixmok::recursiveCount(int x, int y, int cnt, int dir)
 {
+	if( y+direction[dir][0] < 0 || x + direction[dir][1] < 0 ||
+		y+direction[dir][0] >= BOARD_SIZE || x+direction[dir][1] >= BOARD_SIZE )
+		return cnt;
+
 	if( move[y][x] == move[y+direction[dir][0]][x+direction[dir][1]] )	{
 		return recursiveCount(x+direction[dir][1], y+direction[dir][0], cnt+1, dir);
 	}
