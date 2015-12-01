@@ -315,6 +315,8 @@ void Sixmok::findPosition(int &x, int &y)
 			}
 		}
 	}
+
+	cout << "X : " << x << " Y : " << y << " MAX : " << max << endl;
 }
 
 void Sixmok::calculateWeight()
@@ -333,6 +335,9 @@ void Sixmok::calculateWeight()
 			
 					if( move[newI][newJ] != empty )	{
 						cnt = recursiveCount(newJ, newI, 1, k);
+
+						if( newI < 0 || newJ < 0 || newI >= BOARD_SIZE || newJ >= BOARD_SIZE )
+							continue;
 
 						int newCnt = 0;
 						for(int l=0; l<6; l++)	{
