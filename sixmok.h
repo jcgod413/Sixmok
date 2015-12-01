@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define BOARD_SIZE 19
+#define BOARD_SIZE 17
 #define CRITICAL 99999
 
 enum Player {

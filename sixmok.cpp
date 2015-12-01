@@ -23,25 +23,25 @@ void Sixmok::init()
 	memset(move, 0, sizeof(move));
 	memset(consecutiveMove, 0, sizeof(consecutiveMove));
 
-	// 모서리
-    board[0][0] = "┌", 
-    board[0][BOARD_SIZE-1] = "┐", 
-    board[BOARD_SIZE-1][0] = "└", 
-    board[BOARD_SIZE-1][BOARD_SIZE-1] = "┘";
- 
  	// 몸통
-    for(int i=1; i<BOARD_SIZE-1; i++)
+    for(int i=0; i<BOARD_SIZE-1; i++)
     {
         board[0][i] = "┬";
         board[i][0] = "├";
         board[i][BOARD_SIZE-1] = "┤";
         board[BOARD_SIZE-1][i] = "┴";
         
-        for(int j=1; j<18; j++)
+        for(int j=1; j<BOARD_SIZE-1; j++)
         {
             board[i][j] = "┼";
         }
     }
+	// 모서리
+    board[0][0] = "┌", 
+    board[0][BOARD_SIZE-1] = "┐", 
+    board[BOARD_SIZE-1][0] = "└", 
+    board[BOARD_SIZE-1][BOARD_SIZE-1] = "┘";
+ 
 
 	if( gameMode == Server )	{
 		player.ServerSetting();
@@ -95,9 +95,7 @@ void Sixmok::play()
 void Sixmok::printBoard()
 {
 	string msg[2] = {"Server", "Client"};
-	board[5][5] = 1;
 	system("cls");
-	board[5][5] = "┼";
 	for(int i=0; i<BOARD_SIZE; i++)	{
 		for(int j=0; j<BOARD_SIZE; j++)	{
 			switch( move[i][j])	{
@@ -119,8 +117,8 @@ void Sixmok::printBoard()
 		}
 		cout << endl;
 	}
-	cout << "0 1 2 3 4 5 6 7 8 9 1 1 1 1 1 1 1 1 1" << endl;
-	cout << "                    0 1 2 3 4 5 6 7 8" << endl << endl;
+	cout << "0 1 2 3 4 5 6 7 8 9 1 1 1 1 1 1 1" << endl;
+	cout << "                    0 1 2 3 4 5 6" << endl << endl;
 
 	if( consecutiveMove[4] == 1 )
 	{
@@ -174,7 +172,7 @@ void Sixmok::playerInput()
 		x = gameData.x;
 		y = gameData.y;
 
-		if( x > 0 && x < BOARD_SIZE-1 && y > 0 && y < BOARD_SIZE-1 )	{
+		if( x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE )	{
 			if( move[y][x] == playerA
 				|| move[y][x] == playerB )	{
 				cout << "이미 돌이 놓여져있는 자리입니다." << endl;
@@ -221,7 +219,7 @@ void Sixmok::playerInput2()
 		gameData.win = 0;
 		player.SendData(&gameData);
 		
-		if( x > 0 && x < BOARD_SIZE-1 && y > 0 && y < BOARD_SIZE-1 )	{
+		if( x >= 0 && x < BOARD_SIZE && y >= 0 && y < BOARD_SIZE )	{
 			if( move[y][x] == playerA
 				|| move[y][x] == playerB )	{
 				cout << "이미 돌이 놓여져있는 자리입니다." << endl;
@@ -256,8 +254,8 @@ void Sixmok::computerInput()
 	for(int i=0; i<2; i++)	{
 		// 첫 수
 		if( number == 1 && gameMode == Server )	{
-			x = (rand() % 7) + 6;	// 6~12
-			y = (rand() % 7) + 6;	// 6~12
+			x = (rand() % 7) + 5;	// 5~11
+			y = (rand() % 7) + 5;	// 5~11
 			moveStone(x, y);
 
 			gameData.x = x;
@@ -300,8 +298,8 @@ void Sixmok::findPosition(int &x, int &y)
 {
 	int max = -1;
 
-	for(int i=1; i<BOARD_SIZE-1; i++)	{
-		for(int j=1; j<BOARD_SIZE-1; j++)	{
+	for(int i=0; i<BOARD_SIZE; i++)	{
+		for(int j=0; j<BOARD_SIZE; j++)	{
 			if( move[i][j] != empty )
 				continue;
 
@@ -326,8 +324,8 @@ void Sixmok::calculateWeight()
 
 	int cnt = 0;
 
-	for(int i=1; i<BOARD_SIZE-1; i++)	{
-		for(int j=1; j<BOARD_SIZE-1; j++)	{
+	for(int i=0; i<BOARD_SIZE; i++)	{
+		for(int j=0; j<BOARD_SIZE; j++)	{
 			if( move[i][j] == empty )	{
 				for(int k=0; k<8; k++)	{
 					int newI = i + direction[k][0];
@@ -379,8 +377,8 @@ void Sixmok::findConnection()
 {
 	memset(consecutiveMove, 0, sizeof(consecutiveMove)); 
 
-	for(int i=1; i<BOARD_SIZE-1; i++)	{ 
-		for(int j=1; j<BOARD_SIZE-1; j++)	{ 
+	for(int i=0; i<BOARD_SIZE; i++)	{ 
+		for(int j=0; j<BOARD_SIZE; j++)	{ 
 			for(int k=2; k<=5; k++)	{ 
 				if( move[i][j] != empty )	{ 
 					int oppositeDir = (k + 4) % 8; 
